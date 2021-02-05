@@ -6,8 +6,11 @@ import vk_api
 from vk_api import VkUpload
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from vk_api.utils import get_random_id
+import yaml
 
-from config import *
+
+with open("config.yaml") as ymlFile:
+    config = yaml.load(ymlFile.read(), Loader=yaml.Loader)
 
 
 class Bot():
@@ -54,6 +57,7 @@ class Bot():
     def send_doc(self, file):
         response = self.vk_upload.document(doc=file, title="Test")["doc"]
         attachment = "doc{}_{}".format(response["owner_id"], response["id"])
+        print(attachment)
         self.write_message(attachment=attachment)
 
     def auth_handler(self, remember_device=None):
@@ -64,14 +68,14 @@ class Bot():
 
     def auth(self):
         # Авторизация бота
-        self.authorize = vk_api.VkApi(token=longpoll_token)
-        self.longpoll = VkBotLongPoll(self.authorize, group_id=group_id)
+        self.authorize = vk_api.VkApi(token=config["group"]["group_key"])
+        self.longpoll = VkBotLongPoll(self.authorize, group_id=config["group"]["group_id"])
         self.upload = vk_api.VkUpload(self.authorize)
 
         # Авторизация в vk session
         vk_session = vk_api.VkApi(
-            login=login,
-            password=password,
+            login=config["user"]["login"],
+            password=config["user"]["password"],
             auth_handler=self.auth_handler
         )
         try:
@@ -84,37 +88,40 @@ class Bot():
             self.vk = vk_session.get_api()
             self.vk_upload = vk_api.VkUpload(vk_session)
 
+    def check_message(self):
+        if self.received_message == "привет":
+            self.write_message(f"Привет {self.user_info['first_name']}")
+        elif self.received_message == "картинка":
+            photo = random.choice(tuple((self.IMG_DIR).iterdir()))
+            self.send_photo(str(photo))
+        elif self.received_message == "видео":
+            video = random.choice(tuple((self.VIDEO_DIR).iterdir()))
+            self.send_video(str(video))
+        elif self.received_message == "аудио":
+            song = random.choice(tuple((self.MUSIC_DIR).iterdir()))
+            self.send_audio(song)
+        elif self.received_message == "документ":
+            document = random.choice(tuple((self.DOC_DIR).iterdir()))
+            self.send_doc(str(document))
+
     def watch(self):
         """Отслеживаем каждое событие в беседе."""
         while True:
             try:
                 for event in self.longpoll.listen():
                     if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and event.message.get("text") != "":
-                        received_message = event.message.get("text").lower()
+                        self.received_message = event.message.get("text").lower()
                         self.sender = event.chat_id
                         self.user_id = event.message.get("from_id")
                         self.user_info = self.vk.users.get(user_id=self.user_id)[0]
-                        if received_message == "привет":
-                            self.write_message(f"Привет {self.user_info['first_name']}")
-                        elif received_message == "картинка":
-                            photo = random.choice(tuple((self.IMG_DIR).iterdir()))
-                            self.send_photo(str(photo))
-                        elif received_message == "видео":
-                            video = random.choice(tuple((self.VIDEO_DIR).iterdir()))
-                            self.send_video(str(video))
-                        elif received_message == "аудио":
-                            song = random.choice(tuple((self.MUSIC_DIR).iterdir()))
-                            self.send_audio(song)
-                        elif received_message == "документ":
-                            document = random.choice(tuple((self.DOC_DIR).iterdir()))
-                            self.send_doc(document)
+                        self.check_message()
             except Exception as e:
                 print(e)
 
     def start_watch(self):
         self.auth()
 
-        self.start_watch()
+        self.watch()
 
 
 if __name__ == "__main__":
