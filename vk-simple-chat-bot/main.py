@@ -90,22 +90,22 @@ class Bot():
             try:
                 for event in self.longpoll.listen():
                     if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and event.message.get("text") != "":
-                        self.reseived_message = event.message.get("text").lower()
+                        received_message = event.message.get("text").lower()
                         self.sender = event.chat_id
                         self.user_id = event.message.get("from_id")
                         self.user_info = self.vk.users.get(user_id=self.user_id)[0]
-                        if self.reseived_message == "привет":
+                        if received_message == "привет":
                             self.write_message(f"Привет {self.user_info['first_name']}")
-                        elif self.reseived_message == "картинка":
+                        elif received_message == "картинка":
                             photo = random.choice(tuple((self.IMG_DIR).iterdir()))
                             self.send_photo(str(photo))
-                        elif self.reseived_message == "видео":
+                        elif received_message == "видео":
                             video = random.choice(tuple((self.VIDEO_DIR).iterdir()))
                             self.send_video(str(video))
-                        elif self.reseived_message == "аудио":
+                        elif received_message == "аудио":
                             song = random.choice(tuple((self.MUSIC_DIR).iterdir()))
                             self.send_audio(song)
-                        elif self.reseived_message == "документ":
+                        elif received_message == "документ":
                             document = random.choice(tuple((self.DOC_DIR).iterdir()))
                             self.send_doc(document)
             except Exception as e:
