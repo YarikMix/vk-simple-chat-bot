@@ -24,11 +24,16 @@ class Bot():
     def write_message(self, message="", attachment=""):
         """Отправляем в беседу сообщение."""
         self.authorize.method("messages.send", {
-            "chat_id": self.sender, 
+            "chat_id": self.chat_id,
             "message": message, 
             "attachment": attachment, 
             "random_id": get_random_id()
         })
+
+    def say_hello(self):
+        user_info = self.vk.users.get(user_id=self.user_id)[0]
+        username = user_info["first_name"]
+        self.write_message(f"Привет {username}!")
 
     def send_photo(self, file):
         """Загружаем фото на сервер Вконтакте."""
@@ -55,9 +60,8 @@ class Bot():
 
     # Не работает
     def send_doc(self, file):
-        response = self.vk_upload.document(doc=file, title="Test")["doc"]
+        response = self.vk_upload.document(doc=file)["doc"]
         attachment = "doc{}_{}".format(response["owner_id"], response["id"])
-        print(attachment)
         self.write_message(attachment=attachment)
 
     def auth_handler(self, remember_device=None):
@@ -74,8 +78,7 @@ class Bot():
 
         # Авторизация в vk session
         vk_session = vk_api.VkApi(
-            login=config["user"]["login"],
-            password=config["user"]["password"],
+            token=config["access_token"]["token"],
             auth_handler=self.auth_handler
         )
         try:
@@ -88,19 +91,19 @@ class Bot():
             self.vk = vk_session.get_api()
             self.vk_upload = vk_api.VkUpload(vk_session)
 
-    def check_message(self):
-        if self.received_message == "привет":
-            self.write_message(f"Привет {self.user_info['first_name']}")
-        elif self.received_message == "картинка":
+    def check_message(self, received_message):
+        if received_message == "привет":
+            self.say_hello()
+        elif received_message == "картинка":
             photo = random.choice(tuple((self.IMG_DIR).iterdir()))
             self.send_photo(str(photo))
-        elif self.received_message == "видео":
+        elif received_message == "видео":
             video = random.choice(tuple((self.VIDEO_DIR).iterdir()))
             self.send_video(str(video))
-        elif self.received_message == "аудио":
+        elif received_message == "аудио":
             song = random.choice(tuple((self.MUSIC_DIR).iterdir()))
             self.send_audio(song)
-        elif self.received_message == "документ":
+        elif received_message == "документ":
             document = random.choice(tuple((self.DOC_DIR).iterdir()))
             self.send_doc(str(document))
 
@@ -110,11 +113,9 @@ class Bot():
             try:
                 for event in self.longpoll.listen():
                     if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and event.message.get("text") != "":
-                        self.received_message = event.message.get("text").lower()
-                        self.sender = event.chat_id
+                        received_message = event.message.get("text").lower()
                         self.user_id = event.message.get("from_id")
-                        self.user_info = self.vk.users.get(user_id=self.user_id)[0]
-                        self.check_message()
+                        self.check_message(received_message)
             except Exception as e:
                 print(e)
 

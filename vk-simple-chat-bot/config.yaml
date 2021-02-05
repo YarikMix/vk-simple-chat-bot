@@ -1,6 +1,5 @@
-user:
-  login: ""  # Ваш логин от вк
-  password: ""  # Ваш пароль от вк
 group:
   group_id: ""  # id группы
   group_key: ""  # Ключ группы
+acess_token:
+  token: ""  # Ваш токен
