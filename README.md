@@ -8,7 +8,7 @@
 pip3 install -r requirements.txt
 ```
 В файл config.yaml вписываем данные свои данные. <br>
-**Внимание**, токен Standalone-приложения не подойдёт.
+**Внимание**, токен от Standalone-приложения не подойдёт.
 Нужен [ключ доступа пользователя](https://vk.com/dev/implicit_flow_user) или выше
 
 ```bash
