@@ -3,6 +3,7 @@ import random
 from pathlib import Path
 
 import vk_api
+from vk_api import VkUpload
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from vk_api.utils import get_random_id
 
