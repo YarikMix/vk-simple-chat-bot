@@ -7,12 +7,15 @@
 ```bash
 pip3 install -r requirements.txt
 ```
-В файл config.py вписываем данные свои данные:
+В файл config.yaml вписываем данные свои данные:
+**Внимание**, токен Standalone-приложения не подойдёт.
+Нужен [ключ доступа пользователя](https://vk.com/dev/implicit_flow_user) или выше
+
 ```bash
-longpoll_token = ""  # Ключ доступа группы
-vk_api_token = ""  # Ваш токен
-group_id = "" # id группы с ботом
-login = ""  # Ваш логин от вк
-password = ""  # Ваш пароль от вк
+group:
+  group_id: ""  # id группы
+  group_key: ""  # Ключ cообщества
+access_token:
+  token: ""  # Токен
 ```
 [Гайд по настройке группы и бота](https://www.youtube.com/watch?v=DJV_Y1yNWRE&ab_channel=RPT-RussianPythonTutor)

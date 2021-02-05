@@ -1,5 +1,5 @@
 group:
   group_id: ""  # id группы
   group_key: ""  # Ключ группы
-acess_token:
+access_token:
   token: ""  # Ваш токен
