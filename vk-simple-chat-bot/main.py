@@ -25,15 +25,15 @@ class Bot():
         """Отправляем в беседу сообщение."""
         self.authorize.method("messages.send", {
             "chat_id": self.chat_id,
-            "message": message, 
-            "attachment": attachment, 
+            "message": message,
+            "attachment": attachment,
             "random_id": get_random_id()
         })
 
     def say_hello(self):
         user_info = self.vk.users.get(user_id=self.user_id)[0]
         username = user_info["first_name"]
-        self.write_message(f"Привет {username}!")
+        self.write_message(message=f"Привет {username}!")
 
     def send_photo(self, file):
         """Загружаем фото на сервер Вконтакте."""
@@ -114,6 +114,7 @@ class Bot():
                 for event in self.longpoll.listen():
                     if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and event.message.get("text") != "":
                         received_message = event.message.get("text").lower()
+                        self.chat_id = event.chat_id
                         self.user_id = event.message.get("from_id")
                         self.check_message(received_message)
             except Exception as e:
