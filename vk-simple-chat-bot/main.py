@@ -19,7 +19,12 @@ class Bot():
 
     def write_message(self, message="", attachment=""):
         """Отправляем в беседу сообщение."""
-        self.authorize.method("messages.send", {"chat_id": self.sender, "message": message, "attachment": attachment, "random_id": get_random_id()})
+        self.authorize.method("messages.send", {
+            "chat_id": self.sender, 
+            "message": message, 
+            "attachment": attachment, 
+            "random_id": get_random_id()
+        })
 
     def send_photo(self, file):
         """Загружаем фото на сервер Вконтакте."""
