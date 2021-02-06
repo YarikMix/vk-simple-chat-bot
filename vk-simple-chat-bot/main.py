@@ -35,34 +35,35 @@ class Bot():
         username = user_info["first_name"]
         self.write_message(message=f"Привет {username}!")
 
-    def send_photo(self, file):
-        """Загружаем фото на сервер Вконтакте."""
-        response = self.upload.photo_messages(photos=file)[0]
-        attachment = "photo{}_{}".format(response["owner_id"], response["id"])
+    def send_file(self, file, file_type):
+        if file_type == "photo":
+            """Загружаем фото на сервер Вконтакте."""
+            response = self.upload.photo_messages(photos=file)[0]
+            attachment = "photo{}_{}".format(response["owner_id"], response["id"])
+        elif file_type == "video":
+            """Загружаем видео на сервер Вконтакте."""
+            response = self.vk_upload.video(video_file=file, name='test')
+            attachment = "video{}_{}".format(response["owner_id"], response["video_id"])
+        elif file_type == "audio":
+            """Загружаем аудиозапись на сервер Вконтакте."""
+            song_data = str(file.name)[:-3].split(" - ")
+            response = self.vk_upload.audio(
+                audio = str(file),
+                artist = song_data[0],
+                title = song_data[1]
+            )
+            attachment = "audio{}_{}".format(response["owner_id"], response["id"])
+        # Не работает
+        elif file_type == "doc":
+            response = self.vk_upload.document(doc=file)["doc"]
+            attachment = "doc{}_{}".format(response["owner_id"], response["id"])
         self.write_message(attachment=attachment)
 
-    def send_video(self, file):
-        """Загружаем видео на сервер Вконтакте."""
-        response = self.vk_upload.video(video_file=file, name='test')
-        attachment = "video{}_{}".format(response["owner_id"], response["video_id"])
-        self.write_message(attachment=attachment)
-
-    def send_audio(self, file):
-        """Загружаем аудиозапись на сервер Вконтакте."""
-        song_data = str(file.name)[:-3].split(" - ")
-        response = self.vk_upload.audio(
-            audio = str(file),
-            artist = song_data[0],
-            title = song_data[1]
-        )
-        attachment = "audio{}_{}".format(response["owner_id"], response["id"])
-        self.write_message(attachment=attachment)
-
-    # Не работает
-    def send_doc(self, file):
-        response = self.vk_upload.document(doc=file)["doc"]
-        attachment = "doc{}_{}".format(response["owner_id"], response["id"])
-        self.write_message(attachment=attachment)
+    # # Не работает
+    # def send_doc(self, file):
+    #     response = self.vk_upload.document(doc=file)["doc"]
+    #     attachment = "doc{}_{}".format(response["owner_id"], response["id"])
+    #     self.write_message(attachment=attachment)
 
     def auth_handler(self, remember_device=None):
         code = input("Введите код подтверждения\n> ")
@@ -96,16 +97,16 @@ class Bot():
             self.say_hello()
         elif received_message == "картинка":
             photo = random.choice(tuple((self.IMG_DIR).iterdir()))
-            self.send_photo(str(photo))
+            self.send_file(str(photo), "photo")
         elif received_message == "видео":
             video = random.choice(tuple((self.VIDEO_DIR).iterdir()))
-            self.send_video(str(video))
+            self.send_file(str(video), "video")
         elif received_message == "аудио":
             song = random.choice(tuple((self.MUSIC_DIR).iterdir()))
-            self.send_audio(song)
+            self.send_file(song, "audio")
         elif received_message == "документ":
             document = random.choice(tuple((self.DOC_DIR).iterdir()))
-            self.send_doc(str(document))
+            self.send_file(str(document), "doc")
 
     def watch(self):
         """Отслеживаем каждое событие в беседе."""
