@@ -78,12 +78,11 @@ class Bot():
 
         # Авторизация в vk session
         vk_session = vk_api.VkApi(
-            login=config["user"]["login"],
             token=config["access_token"]["token"],
             auth_handler=self.auth_handler
         )
         try:
-            vk_session.auth()
+            vk_session.auth(token_only=True)
         except Exception as e:
             print("Не получилось авторизоваться, попробуйте снова.")
             print(e)
