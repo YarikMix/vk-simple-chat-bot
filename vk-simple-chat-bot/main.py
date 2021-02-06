@@ -78,6 +78,7 @@ class Bot():
 
         # Авторизация в vk session
         vk_session = vk_api.VkApi(
+            login=config["user"]["login"],
             token=config["access_token"]["token"],
             auth_handler=self.auth_handler
         )

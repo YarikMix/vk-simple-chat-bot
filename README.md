@@ -12,10 +12,12 @@ pip3 install -r requirements.txt
 Нужен [ключ доступа пользователя](https://vk.com/dev/implicit_flow_user) или выше
 
 ```bash
+user:
+  login: ""  # Ваш логин от вк
 group:
-  group_id: ""  # id группы
-  group_key: ""  # Ключ cообщества
+  group_id:   # id группы
+  group_key: ""  # Ключ сообщества
 access_token:
-  token: ""  # Токен
+  token: ""  # Ваш токен
 ```
 [Гайд по настройке группы и бота](https://www.youtube.com/watch?v=DJV_Y1yNWRE&ab_channel=RPT-RussianPythonTutor)
