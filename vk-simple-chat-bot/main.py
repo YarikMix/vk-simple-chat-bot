@@ -1,14 +1,14 @@
-# -*- coding: utf-8 -*-
 import random
 import logging
 from pathlib import Path
 
+import yaml
 import requests
 import vk_api
 from vk_api import VkUpload
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from vk_api.utils import get_random_id
-import yaml
+from gtts import gTTS
 
 from functions import get_random_file, get_weather
 
@@ -34,14 +34,14 @@ logging.basicConfig(
 authorize = vk_api.VkApi(token=config["group"]["group_token"])
 
 longpoll = VkBotLongPoll(authorize, group_id=config["group"]["group_id"])
-bot_upload = vk_api.VkUpload(authorize)
+bot_upload = VkUpload(authorize)
 bot = authorize.get_api()
 
 # Авторизация в пользователя
 vk_session = vk_api.VkApi(token=config["user"]["user_token"])
 
 vk = vk_session.get_api()
-vk_upload = vk_api.VkUpload(vk_session)
+vk_upload = VkUpload(vk_session)
 
 logging.info("Авторизация прошла успешно")
 
@@ -79,10 +79,23 @@ class VkBot:
             random_id=get_random_id()
         )
 
-    def say_hello(self, user_id):
-        user_info = vk.users.get(user_id=user_id)[0]
+    def say_hello(self):
+        user_info = vk.users.get(user_id=self.sender_id)[0]
         username = user_info["first_name"]
-        self.write_message(message=f"Привет {username}!")
+        message = f"Привет, {username}!"
+        x = random.randint(1, 2)
+        if x == 1:
+            # Отправляем сообщение в беседу
+            self.write_message(message=message)
+        else:
+            # Отправляем голосовое сообщение в беседу
+            tts = gTTS(text=message, lang="ru", lang_check=True)
+            file_path = BASE_DIR.joinpath("audio.mp3")
+            tts.save(file_path)
+
+            self.send_file("audio.mp3", file_type="audio_message")
+
+            file_path.unlink()
 
     def send_file(self, file, file_type):
         attachment = ""
@@ -106,6 +119,12 @@ class VkBot:
                 title = song_data[1]
             )
             attachment = "audio{}_{}".format(response["owner_id"], response["id"])
+        elif file_type == "audio_message":
+            response = bot_upload.audio_message(
+                audio="audio.mp3",
+                peer_id=2000000000 + self.chat_id
+            )["audio_message"]
+            attachment = "doc{}_{}".format(response["owner_id"], response["id"])
         elif file_type == "doc":
             response = bot_upload.document_message(
                 doc=file,
@@ -117,9 +136,7 @@ class VkBot:
 
     def check_message(self, received_message):
         if received_message == "привет":
-            username = vk.users.get(user_id=self.sender_id)[0]["first_name"]
-            message = f"Привет {username}!"
-            self.write_message(message=message)
+            self.say_hello()
 
         elif received_message == "фото":
             photo = get_random_file(IMG_DIR)
@@ -200,6 +217,7 @@ class VkBot:
     def run(self):
         logging.info("Бот запущен")
         self.listen()
+
 
 if __name__ == "__main__":
     vkbot = VkBot()

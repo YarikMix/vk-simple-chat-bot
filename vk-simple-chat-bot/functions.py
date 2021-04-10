@@ -10,8 +10,6 @@ def get_random_file(path):
 def get_weather(city):
     url = f"https://sinoptik.com.ru/погода-{city}"
     response = requests.get(url)
-    write_html(response.content)
-    print(response.status_code)
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, "html.parser")
         temp = soup.find("div", class_="weather__article_main_temp").text.strip()
