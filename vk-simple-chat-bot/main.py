@@ -30,6 +30,9 @@ logging.basicConfig(
     level=logging.INFO
 )
 
+logger = logging.getLogger('vk_api')
+logger.disabled = True
+
 # Авторизация бота
 authorize = vk_api.VkApi(token=config["group"]["group_token"])
 
